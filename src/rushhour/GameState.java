@@ -29,18 +29,28 @@ public class GameState implements search.State {
     int nrRows;
     int nrCols;
 
-    private static MoveHorizontal horizontal = new MoveHorizontal();
-    private static MoveVertical vertical = new MoveVertical();
+    List <Integer>colCars;
+    List <Integer>rowCars;
+
+
+
+    private static MoveUp move_up = new MoveUp();
+    private static MoveDown move_down = new MoveDown();
+    private static MoveRight move_right = new MoveRight();
+    private static MoveLeft move_left = new MoveLeft();
 
     public GameState(String fileName) throws Exception {
         BufferedReader in = new BufferedReader(new FileReader(fileName));
         nrRows = Integer.parseInt(in.readLine().split("\\s")[0]);
         nrCols = Integer.parseInt(in.readLine().split("\\s")[0]);
         String s = in.readLine();
+//        System.out.println("this is s: "+ s);
         cars = new ArrayList();
+
         while (s != null) {
             cars.add(new Car(s));
             s = in.readLine();
+
         }
         initOccupied();
     }
@@ -61,11 +71,13 @@ public class GameState implements search.State {
                 occupiedPositions[i][j] = gs.occupiedPositions[i][j];
             }
         }
+        System.out.println(occupiedPositions[0][0]);
         cars = new ArrayList();
         for (Car c : gs.cars) {
             cars.add(new Car(c));
         }
     }
+
 
     public void printState() {
         int[][] state = new int[nrRows][nrCols];
@@ -82,7 +94,7 @@ public class GameState implements search.State {
                 if (state[i][j] == 0) {
                     System.out.print(".");
                 } else {
-                    System.out.print(state[i][j] - 1);
+                    System.out.print("["+(state[i][j] - 1)+"]");
                 }
             }
             System.out.println();
@@ -133,30 +145,74 @@ public class GameState implements search.State {
 
     public List<Action> getLegalActions() {
         ArrayList<Action> res = new ArrayList();
-        if(isLegal(horizontal))
-            res.add(horizontal);
-        if(isLegal(vertical))
-            res.add(vertical);
+        if(isLegal(move_up))
+            res.add(move_up);
+        if(isLegal(move_down))
+            res.add(move_down);
+        if(isLegal(move_right))
+            res.add(move_right);
+        if(isLegal(move_left))
+            res.add(move_left);
         return res;
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public boolean isLegal(Action action) {
-        if(action instanceof MoveHorizontal)
-            return nrCols!=nrCols;
-        else if(action instanceof MoveVertical)
-            return nrRows!=nrRows;
-        else
-            return false;
+
+// in order to define if a move is legal or not
+// we have to know all the occupied positions by other cars
+// and not allow moves outside the box
+// check the orientation first of the car and decided if move can be made
+        for (int i=0; i<cars.size(); i++){
+            System.out.println("Car:"+ i + "has "+cars.get(i).getOccupyingPositions());
+        }
+
+printState();
+
+        if (action instanceof MoveUp)
+//            check the above row
+                return true;
+            else if (action instanceof MoveDown)
+//                check the row below
+                return true;
+            else if (action instanceof MoveRight)
+//                check the column + 1
+                return true;
+            else if (action instanceof MoveLeft)
+//                check the column - 1
+                return true;
+            else
+
+                return false;
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public State doAction(Action action) {
+//        GameState res = new GameState(occupiedPositions);
+//        if(action instanceof MoveHorizontal)
+//            res.moveBlank(rowBlank,colBlank-1);
+//        else if(action instanceof MoveRight)
+//            res.moveBlank(rowBlank,colBlank+1);
+//        else if(action instanceof MoveUp)
+//            res.moveBlank(rowBlank-1,colBlank);
+//        else if(action instanceof MoveDown)
+//            res.moveBlank(rowBlank+1,colBlank);
+//        else
+//            return null;
+//        return res;
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public int getEstimatedDistanceToGoal() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//        get the column of the car and the total columns
+        int distance = 0;
+        int carColumn = cars.get(0).getCol();
+        distance = nrCols - carColumn;
+
+        return distance;
+
+
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }
