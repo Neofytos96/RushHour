@@ -145,6 +145,8 @@ public class GameState implements search.State {
 
     public List<Position> getNonOccupyingPositions() {
         List<Position> nonOccupiedPositions = new ArrayList();
+        List<Position> neighbours = new ArrayList();
+
         int[][] state = new int[nrRows][nrCols];
         for (int i = 0; i < cars.size(); i++) {
             List<Position> l = cars.get(i).getOccupyingPositions();
@@ -156,11 +158,33 @@ public class GameState implements search.State {
             for (int j = 0; j < state[0].length; j++) {
                 if (state[i][j] == 0) {
 //                    nonOccupiedPositions[i][j] = true;
+                    if (i > 0) {
+                        neighbours.add(new Position(i - 1, j));
+                    }
+                    if (i < nrRows -1) {
+                        neighbours.add(new Position(i + 1, j));
+                    }
+                    if (j > 0) {
+//                        System.out.println("First: "+j);
+                        neighbours.add(new Position(i , j-1));
+                    }
+                    if (j < nrCols -1) {
+//                        System.out.println("Second: "+j);
+
+                        neighbours.add(new Position(i , j+1));
+                    }
+//                    if (j > 0 && j < nrCols) {
+//                        neighbours.add(new Position(i, j + 1));
+//                        neighbours.add(new Position(i, j - 1));
+//
+//                    }
                     nonOccupiedPositions.add(new Position(i, j));
 //                    System.out.print(i + "," + j + "   ");
                 }
             }
         }
+        System.out.println("Neighbours" + neighbours);
+//        printState();
         return nonOccupiedPositions;
     }
 
@@ -168,14 +192,18 @@ public class GameState implements search.State {
 //        find which cars have blanks and can move to the blank
         GameState gs = new GameState(nrRows, nrCols, cars);
         for (int i = 0; i < cars.size(); i++) {
-//            System.out.println(cars.get(i).getOccupyingPositions().get(0));
+//            System.out.println(cars.get(i).getOccupyingPositions());
         }
-//        System.out.println(getNonOccupyingPositions().size());
+        System.out.println("Non occupied: " + getNonOccupyingPositions());
+        for (int j = 0; j < getNonOccupyingPositions().size(); j++) {
+            for (int i = 0; i < cars.size(); i++) {
+//                System.out.println("Car occupied: "+ cars.get(i).getOccupyingPositions());
+//                System.out.println("Non occupied: "+ getNonOccupyingPositions().get(j));
 
-        for (int j = 0; j< getNonOccupyingPositions().size(); j++){
-            System.out.println(getNonOccupyingPositions().get(j));
+
+//                System.out.println(getNonOccupyingPositions().contains(cars.get(i).getOccupyingPositions().get(0)));
+            }
         }
-
 
 
         ArrayList<Action> res = new ArrayList();
