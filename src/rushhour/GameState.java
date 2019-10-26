@@ -15,23 +15,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import search.Action;
 import search.State;
 
 /**
- *
  * @author steven
  */
 public class GameState implements search.State {
 
     boolean[][] occupiedPositions;
+    boolean[][] nonOccupiedPositions;
     List<Car> cars; // target car is always the first one    
     int nrRows;
     int nrCols;
 
-    List <Integer>colCars;
-    List <Integer>rowCars;
-
+    List<Integer> colCars;
+    List<Integer> rowCars;
 
 
     private static MoveUp move_up = new MoveUp();
@@ -94,7 +94,7 @@ public class GameState implements search.State {
                 if (state[i][j] == 0) {
                     System.out.print(".");
                 } else {
-                    System.out.print("["+(state[i][j] - 1)+"]");
+                    System.out.print("[" + (state[i][j] - 1) + "]");
                 }
             }
             System.out.println();
@@ -143,17 +143,52 @@ public class GameState implements search.State {
         }
     }
 
+    public List<Position> getNonOccupyingPositions() {
+        List<Position> nonOccupiedPositions = new ArrayList();
+        int[][] state = new int[nrRows][nrCols];
+        for (int i = 0; i < cars.size(); i++) {
+            List<Position> l = cars.get(i).getOccupyingPositions();
+            for (Position pos : l) {
+                state[pos.getRow()][pos.getCol()] = i + 1;
+            }
+        }
+        for (int i = 0; i < state.length; i++) {
+            for (int j = 0; j < state[0].length; j++) {
+                if (state[i][j] == 0) {
+//                    nonOccupiedPositions[i][j] = true;
+                    nonOccupiedPositions.add(new Position(i, j));
+//                    System.out.print(i + "," + j + "   ");
+                }
+            }
+        }
+        return nonOccupiedPositions;
+    }
+
     public List<Action> getLegalActions() {
+//        find which cars have blanks and can move to the blank
+        GameState gs = new GameState(nrRows, nrCols, cars);
+        for (int i = 0; i < cars.size(); i++) {
+//            System.out.println(cars.get(i).getOccupyingPositions().get(0));
+        }
+//        System.out.println(getNonOccupyingPositions().size());
+
+        for (int j = 0; j< getNonOccupyingPositions().size(); j++){
+            System.out.println(getNonOccupyingPositions().get(j));
+        }
+
+
+
         ArrayList<Action> res = new ArrayList();
-        if(isLegal(move_up))
+        if (isLegal(move_up))
             res.add(move_up);
-        if(isLegal(move_down))
+        if (isLegal(move_down))
             res.add(move_down);
-        if(isLegal(move_right))
+        if (isLegal(move_right))
             res.add(move_right);
-        if(isLegal(move_left))
+        if (isLegal(move_left))
             res.add(move_left);
         return res;
+
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -163,34 +198,35 @@ public class GameState implements search.State {
 // we have to know all the occupied positions by other cars
 // and not allow moves outside the box
 // check the orientation first of the car and decided if move can be made
-        for (int i=0; i<cars.size(); i++){
-            System.out.println("Car:"+ i + "has "+cars.get(i).getOccupyingPositions());
+        for (int i = 0; i < cars.size(); i++) {
+//            System.out.println("Car:"+ i + "has "+cars.get(i).getOccupyingPositions());
         }
 
-printState();
+//printState();
 
         if (action instanceof MoveUp)
 //            check the above row
-                return true;
-            else if (action instanceof MoveDown)
+            return true;
+        else if (action instanceof MoveDown)
 //                check the row below
-                return true;
-            else if (action instanceof MoveRight)
+            return true;
+        else if (action instanceof MoveRight)
 //                check the column + 1
-                return true;
-            else if (action instanceof MoveLeft)
+            return true;
+        else if (action instanceof MoveLeft)
 //                check the column - 1
-                return true;
-            else
+            return true;
+        else
 
-                return false;
+            return false;
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public State doAction(Action action) {
-//        GameState res = new GameState(occupiedPositions);
-//        if(action instanceof MoveHorizontal)
-//            res.moveBlank(rowBlank,colBlank-1);
+        GameState res = new GameState(nrRows, nrCols, cars);
+//        if(action instanceof MoveRight)
+
+
 //        else if(action instanceof MoveRight)
 //            res.moveBlank(rowBlank,colBlank+1);
 //        else if(action instanceof MoveUp)
@@ -202,6 +238,7 @@ printState();
 //        return res;
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
 
     public int getEstimatedDistanceToGoal() {
 //        get the column of the car and the total columns
