@@ -143,9 +143,9 @@ public class GameState implements search.State {
         }
     }
 
-    public List<Position> getNonOccupyingPositions() {
+    public List<PositionOccupied> getNonOccupyingPositions() {
         List<Position> nonOccupiedPositions = new ArrayList();
-        List<Position> neighbours = new ArrayList();
+        List<PositionOccupied> neighbours = new ArrayList();
 
         int[][] state = new int[nrRows][nrCols];
         for (int i = 0; i < cars.size(); i++) {
@@ -160,19 +160,19 @@ public class GameState implements search.State {
 //                    nonOccupiedPositions[i][j] = true;
 //                    find the neighbour points of the non occupied positions
                     if (i > 0) {
-                        neighbours.add(new Position(i - 1, j));
+                        neighbours.add(new PositionOccupied(i - 1, j, true));
                     }
                     if (i < nrRows - 1) {
-                        neighbours.add(new Position(i + 1, j));
+                        neighbours.add(new PositionOccupied(i + 1, j, true));
                     }
                     if (j > 0) {
 //                        System.out.println("First: "+j);
-                        neighbours.add(new Position(i, j - 1));
+                        neighbours.add(new PositionOccupied(i, j - 1, false));
                     }
                     if (j < nrCols - 1) {
 //                        System.out.println("Second: "+j);
 
-                        neighbours.add(new Position(i, j + 1));
+                        neighbours.add(new PositionOccupied(i, j + 1, false));
                     }
 //                    if (j > 0 && j < nrCols) {
 //                        neighbours.add(new Position(i, j + 1));
@@ -191,46 +191,34 @@ public class GameState implements search.State {
 
     public List<Action> getLegalActions() {
 //        find which cars have blanks and can move to the blank
-        GameState gs = new GameState(nrRows, nrCols, cars);
-        for (int i = 0; i < cars.size(); i++) {
-//            System.out.println(cars.get(i).getOccupyingPositions());
-        }
-//        List<Position> sample = new ArrayList();
-//        List<Position> sample2 = new ArrayList();
-//        sample.add(new Position(1,3));
-//        sample.add(new Position(2,1));
-//        sample2.add(new Position(1,3));
-//
-//        for (int i=0; i<sample.size(); i++){
-//            for (int j=0; j<sample2.size(); j++){
-//                if (sample.get(i).getCol()==sample2.get(j).getCol() && sample.get(i).getRow()== sample2.get(j).getRow()){
-//                    System.out.println(sample.get(i));
-//                    System.out.println(sample2.get(j));
-//                }
-//            }
-//        }
-
-//        System.out.println(sample+"\n"+ getNonOccupyingPositions() +"\n"+cars.get(0).getOccupyingPositions());
-//        System.out.println(cars.get(0).getOccupyingPositions().get(0).equals((getNonOccupyingPositions().get(19))));
-//        System.out.println("Neighbours: " + getNonOccupyingPositions());
-//        System.out.println("Check: "+sample.contains(sample2));
 
         for (int pos = 0; pos < getNonOccupyingPositions().size(); pos++) {
             for (int car = 0; car < cars.size(); car++) {
-                if (getNonOccupyingPositions().get(pos).getCol() == cars.get(car).getCol() && getNonOccupyingPositions().get(pos).getRow() == cars.get(car).getRow()) {
-                    System.out.println("OP: "+ getNonOccupyingPositions().get(pos) + "| car: " + cars.indexOf(cars.get(car)));
+                for (int occPos = 0; occPos < cars.get(car).getOccupyingPositions().size(); occPos++) {
+                    if (getNonOccupyingPositions().get(pos).getCol() ==
+                            cars.get(car).getOccupyingPositions().get(occPos).getCol()
+                            && getNonOccupyingPositions().get(pos).getRow() ==
+                            cars.get(car).getOccupyingPositions().get(occPos).getRow()
+                            && getNonOccupyingPositions().get(pos).getVertical()
+                            && cars.get(car).isVertical()) {
+                        System.out.println("Vertical: " + cars.indexOf(cars.get(car)));
+
+
+//                    found cars that are next to non occupied positions
+                    } else if (getNonOccupyingPositions().get(pos).getCol()
+                            == cars.get(car).getOccupyingPositions().get(occPos).getCol()
+                            && getNonOccupyingPositions().get(pos).getRow()
+                            == cars.get(car).getOccupyingPositions().get(occPos).getRow()
+                            && !getNonOccupyingPositions().get(pos).getVertical()
+                            && !cars.get(car).isVertical()) {
+
+                        System.out.println("horizontal: " + cars.indexOf(cars.get(car)));
+
+
+                    }
+
 
                 }
-
-//                System.out.println(cars.get(car).getOccupyingPositions());
-//                System.out.println("Car occupied: "+ cars.get(car).getOccupyingPositions());
-//                System.out.println("Non occupied: "+ getNonOccupyingPositions().get(pos));
-//                if (cars.get(car).getOccupyingPositions().get(car).equals(getNonOccupyingPositions().get(pos))){
-//                    System.out.println("vouala");
-//                }
-
-
-//                System.out.println(getNonOccupyingPositions().contains(cars.get(i).getOccupyingPositions().get(0)));
             }
         }
 
