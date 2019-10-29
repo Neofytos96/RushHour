@@ -10,11 +10,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import search.Action;
 import search.State;
@@ -26,13 +22,11 @@ public class GameState implements search.State {
 
     boolean[][] occupiedPositions;
     boolean[][] nonOccupiedPositions;
-    List<Car> cars; // target car is always the first one    
+    List<Car> cars; // target car is always the first one
+    List<Car> carsHorizontal;
+    List<Car> carsVertical;
     int nrRows;
     int nrCols;
-
-    List<Integer> colCars;
-    List<Integer> rowCars;
-
 
     private static MoveUp move_up = new MoveUp();
     private static MoveDown move_down = new MoveDown();
@@ -143,7 +137,8 @@ public class GameState implements search.State {
         }
     }
 
-    public List<PositionOccupied> getNonOccupyingPositions() {
+    //finds the neighbouring points of the empty positions in the grid
+    public List<PositionOccupied> getNeighbours() {
         List<Position> nonOccupiedPositions = new ArrayList();
         List<PositionOccupied> neighbours = new ArrayList();
 
@@ -189,41 +184,84 @@ public class GameState implements search.State {
         return neighbours;
     }
 
+    public List<Position> getNonOccupiedPositions() {
+        List<Position> nonOccupiedPositions = new ArrayList();
+
+        int[][] state = new int[nrRows][nrCols];
+        for (int i = 0; i < cars.size(); i++) {
+            List<Position> l = cars.get(i).getOccupyingPositions();
+            for (Position pos : l) {
+                state[pos.getRow()][pos.getCol()] = i + 1;
+            }
+        }
+        for (int i = 0; i < state.length; i++) {
+            for (int j = 0; j < state[0].length; j++) {
+                if (state[i][j] == 0) {
+//                    nonOccupiedPositions[i][j] = true;
+//                    find the neighbour points of the non occupied positions
+
+                    nonOccupiedPositions.add(new Position(i, j));
+//                    System.out.print(i + "," + j + "   ");
+                }
+            }
+        }
+//        System.out.println("Non occupied: " + nonOccupiedPositions);
+//        printState();
+        return nonOccupiedPositions;
+    }
+
     public List<Action> getLegalActions() {
 //        find which cars have blanks and can move to the blank
-
-        for (int pos = 0; pos < getNonOccupyingPositions().size(); pos++) {
+//      based on the game state i retrieve the possible car that can move
+        carsHorizontal = new ArrayList();
+        carsVertical = new ArrayList();
+        for (int pos = 0; pos < getNeighbours().size(); pos++) {
             for (int car = 0; car < cars.size(); car++) {
                 for (int occPos = 0; occPos < cars.get(car).getOccupyingPositions().size(); occPos++) {
-                    if (getNonOccupyingPositions().get(pos).getCol() ==
+                    if (getNeighbours().get(pos).getCol() ==
                             cars.get(car).getOccupyingPositions().get(occPos).getCol()
-                            && getNonOccupyingPositions().get(pos).getRow() ==
+                            && getNeighbours().get(pos).getRow() ==
                             cars.get(car).getOccupyingPositions().get(occPos).getRow()
-                            && getNonOccupyingPositions().get(pos).getVertical()
+                            && getNeighbours().get(pos).getVertical()
                             && cars.get(car).isVertical()) {
-                        System.out.println("Vertical: " + cars.indexOf(cars.get(car)));
+//                        System.out.println("Vertical: " + cars.indexOf(cars.get(car)));
+                        carsVertical.add(cars.get(car));
 
 
 //                    found cars that are next to non occupied positions
-                    } else if (getNonOccupyingPositions().get(pos).getCol()
+                    } else if (getNeighbours().get(pos).getCol()
                             == cars.get(car).getOccupyingPositions().get(occPos).getCol()
-                            && getNonOccupyingPositions().get(pos).getRow()
+                            && getNeighbours().get(pos).getRow()
                             == cars.get(car).getOccupyingPositions().get(occPos).getRow()
-                            && !getNonOccupyingPositions().get(pos).getVertical()
+                            && !getNeighbours().get(pos).getVertical()
                             && !cars.get(car).isVertical()) {
 
-                        System.out.println("horizontal: " + cars.indexOf(cars.get(car)));
-
+//                        System.out.println("horizontal: " + cars.indexOf(cars.get(car)));
+                        carsHorizontal.add(cars.get(car));
 
                     }
-
-
+                }
+            }
+        }
+        for (int occPos=0; occPos< getNonOccupiedPositions().size();occPos++){
+        for (int car = 0; car < carsVertical.size(); car++) {
+            for (int pos = 0; pos < carsVertical.get(car).getOccupyingPositions().size(); pos++) {
+                if ((carsVertical.get(car).getOccupyingPositions().get(pos).getRow()+1)==getNonOccupiedPositions().get(occPos).getRow()&&
+                        carsVertical.get(car).getOccupyingPositions().get(pos).getCol()==getNonOccupiedPositions().get(occPos).getCol()){
+                    System.out.println(carsVertical.get(car).getOccupyingPositions()+" can move to "+ getNonOccupiedPositions().get(occPos) );
                 }
             }
         }
 
+        }
+        printState();
+
+        for (int car = 0; car < carsHorizontal.size(); car++) {
+
+        }
 
         ArrayList<Action> res = new ArrayList();
+
         if (isLegal(move_up))
             res.add(move_up);
         if (isLegal(move_down))
@@ -232,6 +270,8 @@ public class GameState implements search.State {
             res.add(move_right);
         if (isLegal(move_left))
             res.add(move_left);
+
+
         return res;
 
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -243,11 +283,7 @@ public class GameState implements search.State {
 // we have to know all the occupied positions by other cars
 // and not allow moves outside the box
 // check the orientation first of the car and decided if move can be made
-        for (int i = 0; i < cars.size(); i++) {
-//            System.out.println("Car:"+ i + "has "+cars.get(i).getOccupyingPositions());
-        }
 
-//printState();
 
         if (action instanceof MoveUp)
 //            check the above row

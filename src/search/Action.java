@@ -5,6 +5,8 @@
 
 package search;
 
+import rushhour.Car;
+
 /**
  *
  * @author steven
@@ -13,5 +15,4 @@ public interface Action {
     
     public int getCost();
     public String toString();
-    
 }
