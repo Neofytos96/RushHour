@@ -13,12 +13,12 @@ public class PositionOccupied{
 
     private int row;
     private int col;
-    private boolean isVertical;
+    private String direction;
 
-    public PositionOccupied(int row, int col, boolean isVertical){
+    public PositionOccupied(int row, int col, String direction){
         this.row=row;
         this.col=col;
-        this.isVertical= isVertical;
+        this.direction= direction;
     }
 
     public int getRow(){
@@ -29,10 +29,10 @@ public class PositionOccupied{
         return col;
     }
 
-    public boolean getVertical() {return isVertical; }
+    public String getDirection() {return direction; }
 
     public String toString(){
-        return "(" +row+","+col+ ","+ isVertical+")";
+        return "(" +row+","+col+ ","+ direction+")";
     }
 
 }
