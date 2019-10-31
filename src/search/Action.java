@@ -15,4 +15,5 @@ public interface Action {
     
     public int getCost();
     public String toString();
+    public int getCarIndex();
 }

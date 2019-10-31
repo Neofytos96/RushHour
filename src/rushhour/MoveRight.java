@@ -4,6 +4,14 @@ import search.Action;
 import search.State;
 
 public class MoveRight implements Action {
+    private int carIndex;
+    public int getCarIndex() {
+        return carIndex;
+    }
+
+    public void setCarIndex(int carIndex) {
+        this.carIndex = carIndex;
+    }
     public int getCost() {
         return 1;
     }

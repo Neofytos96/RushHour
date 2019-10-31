@@ -23,10 +23,11 @@ public class GameState implements search.State {
     boolean[][] occupiedPositions;
     boolean[][] nonOccupiedPositions;
     List<Car> cars; // target car is always the first one
-    List<Car> carsHorizontal;
-    List<Car> carsVertical;
+
     int nrRows;
     int nrCols;
+
+    GameState updateState;
 
     private static MoveUp move_up = new MoveUp();
     private static MoveDown move_down = new MoveDown();
@@ -170,7 +171,6 @@ public class GameState implements search.State {
         List<Car> movingCars = new ArrayList();
 
 
-
         int[][] state = new int[nrRows][nrCols];
         for (int i = 0; i < cars.size(); i++) {
             List<Position> l = cars.get(i).getOccupyingPositions();
@@ -214,10 +214,11 @@ public class GameState implements search.State {
         for (int pos = 0; pos < neighbours.size(); pos++) {
             for (int car = 0; car < cars.size(); car++) {
                 for (int occPos = 0; occPos < cars.get(car).getOccupyingPositions().size(); occPos++) {
+                    Position occupiedPos = cars.get(car).getOccupyingPositions().get(occPos);
                     if (neighbours.get(pos).getCol() ==
-                            cars.get(car).getOccupyingPositions().get(occPos).getCol()
+                            occupiedPos.getCol()
                             && neighbours.get(pos).getRow() ==
-                            cars.get(car).getOccupyingPositions().get(occPos).getRow()
+                            occupiedPos.getRow()
                             && neighbours.get(pos).getDirection().equals("down")
                             && cars.get(car).isVertical()) {
 //                        System.out.println("Up: " + cars.indexOf(cars.get(car)));
@@ -226,11 +227,10 @@ public class GameState implements search.State {
 
 
 //                    found cars that are next to non occupied positions
-                    }
-                    else if (neighbours.get(pos).getCol() ==
-                            cars.get(car).getOccupyingPositions().get(occPos).getCol()
+                    } else if (neighbours.get(pos).getCol() ==
+                            occupiedPos.getCol()
                             && neighbours.get(pos).getRow() ==
-                            cars.get(car).getOccupyingPositions().get(occPos).getRow()
+                            occupiedPos.getRow()
                             && neighbours.get(pos).getDirection().equals("up")
                             && cars.get(car).isVertical()) {
 //                        System.out.println("Down: " + cars.indexOf(cars.get(car)));
@@ -239,11 +239,10 @@ public class GameState implements search.State {
 
 
 //                    found cars that are next to non occupied positions
-                    }
-                    else if (neighbours.get(pos).getCol()
-                            == cars.get(car).getOccupyingPositions().get(occPos).getCol()
+                    } else if (neighbours.get(pos).getCol()
+                            == occupiedPos.getCol()
                             && neighbours.get(pos).getRow()
-                            == cars.get(car).getOccupyingPositions().get(occPos).getRow()
+                            == occupiedPos.getRow()
                             && neighbours.get(pos).getDirection().equals("right")
                             && !cars.get(car).isVertical()) {
 
@@ -251,10 +250,10 @@ public class GameState implements search.State {
                         cars.get(car).setDirectionToMove("left");
                         movingCars.add(cars.get(car));
 
-                    }else if (neighbours.get(pos).getCol()
-                            == cars.get(car).getOccupyingPositions().get(occPos).getCol()
+                    } else if (neighbours.get(pos).getCol()
+                            == occupiedPos.getCol()
                             && neighbours.get(pos).getRow()
-                            == cars.get(car).getOccupyingPositions().get(occPos).getRow()
+                            ==occupiedPos.getRow()
                             && neighbours.get(pos).getDirection().equals("left")
                             && !cars.get(car).isVertical()) {
 
@@ -270,26 +269,30 @@ public class GameState implements search.State {
     }
 
 
-
     public List<Action> getLegalActions() {
 //        find which cars have blanks and can move to the blank
 //      based on the game state i retrieve the possible car that can move
 
         ArrayList<Action> possibleMoves = new ArrayList();
         List<Car> movingCars = getMovingCars();
-        for (int i=0; i<movingCars.size(); i++){
-            System.out.println(cars.indexOf(movingCars.get(i))+" can go "+ movingCars.get(i).getDirectionToMove());
-            if (movingCars.get(i).getDirectionToMove().equals("right")){
+        for (int i = 0; i < movingCars.size(); i++) {
+//            System.out.println(cars.indexOf(movingCars.get(i)) + " can go " + movingCars.get(i).getDirectionToMove());
+            if (movingCars.get(i).getDirectionToMove().equals("right")) {
+                move_right.setCarIndex(cars.indexOf(movingCars.get(i)));
                 possibleMoves.add(move_right);
-            }else if (movingCars.get(i).getDirectionToMove().equals("left")){
+            } else if (movingCars.get(i).getDirectionToMove().equals("left")) {
+                move_left.setCarIndex(cars.indexOf(movingCars.get(i)));
                 possibleMoves.add(move_left);
-            }else if (movingCars.get(i).getDirectionToMove().equals("up")){
+            } else if (movingCars.get(i).getDirectionToMove().equals("up")) {
+                move_up.setCarIndex(cars.indexOf(movingCars.get(i)));
                 possibleMoves.add(move_up);
-            }else if (movingCars.get(i).getDirectionToMove().equals("down")){
+
+            } else if (movingCars.get(i).getDirectionToMove().equals("down")) {
+                move_down.setCarIndex(cars.indexOf(movingCars.get(i)));
                 possibleMoves.add(move_down);
             }
         }
-        printState();
+        System.out.println(possibleMoves);
 
 //
 //        if (isLegal(move_up))
@@ -329,12 +332,39 @@ public class GameState implements search.State {
 //            return true;
 //        else
 
-            return true;
+        return true;
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public State doAction(Action action) {
-        GameState res = new GameState(nrRows, nrCols, cars);
+        System.out.println("Action given: "+action+" "+action.getCarIndex());
+        GameState gameState = new GameState(nrRows, nrCols, cars);
+        List<Car> movingCars = getMovingCars();
+//        System.out.println(movingCars);
+        for (int car = 0; car < movingCars.size(); car++) {
+            Car carToMove = movingCars.get(car);
+            String direction = movingCars.get(car).getDirectionToMove();
+
+            if (action instanceof MoveRight && movingCars.get(car).getDirectionToMove().equals("right")) {
+//                System.out.println(cars.indexOf(movingCars.get(car)) + " will move right");
+//                moveCarRight(carToMove, direction);
+                gameState.moveCar(carToMove, direction);
+
+            } else if (action instanceof MoveLeft && movingCars.get(car).getDirectionToMove().equals("left")) {
+//                System.out.println(cars.indexOf(movingCars.get(car)) + " will move left");
+                gameState.moveCar(carToMove, direction);
+
+            } else if (action instanceof MoveUp && movingCars.get(car).getDirectionToMove().equals("up")) {
+//                System.out.println(cars.indexOf(movingCars.get(car)) + " will move up");
+                gameState.moveCar(carToMove, direction);
+
+            } else if (action instanceof MoveDown && movingCars.get(car).getDirectionToMove().equals("down")) {
+//                System.out.println(cars.indexOf(movingCars.get(car)) + " will move down");
+                gameState.moveCar(carToMove, direction);
+
+            }else System.out.println(action);
+
+        }
 //        if(action instanceof MoveRight)
 
 
@@ -346,8 +376,32 @@ public class GameState implements search.State {
 //            res.moveBlank(rowBlank+1,colBlank);
 //        else
 //            return null;
-//        return res;
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return gameState;
+//        System.exit(1);
+//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
+//    return updateState;
+    }
+
+    private void moveCar(Car carToMove, String direction) {
+        System.out.println(direction+" car: "+ cars.indexOf(carToMove) );
+        if (direction.equals("left")) {
+            if (carToMove.getCol() > 0) {
+                carToMove.setCol(carToMove.getCol() - 1);
+            }
+        } else if (direction.equals("right")) {
+            if (carToMove.getCol() < nrCols) {
+                carToMove.setCol(carToMove.getCol() + 1);
+            }
+        } else if (direction.equals("up")) {
+            if (carToMove.getRow() > 0)
+                carToMove.setRow(carToMove.getRow() - 1);
+        } else if (direction.equals("down")) {
+            if (carToMove.getRow() < nrRows) {
+                carToMove.setCol(carToMove.getCol() + 1);
+            }
+        }
+    printState();
     }
 
 
