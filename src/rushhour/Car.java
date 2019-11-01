@@ -17,14 +17,14 @@ public class Car {
     private int col;
     private int length;
     private boolean vertical;
-    private String directionToMove;
+//    private String directionToMove;
 
     public Car(int row, int col, int length, boolean vertical, String directionToMove) {
         this.row = row;
         this.col = col;
         this.length = length;
         this.vertical = vertical;
-        this.directionToMove = directionToMove;
+//        this.directionToMove = directionToMove;
     }
 
     public Car(String s, boolean vertical) {
@@ -66,9 +66,9 @@ public class Car {
         return vertical;
     }
 
-    public String getDirectionToMove() {
-        return directionToMove;
-    }
+//    public String getDirectionToMove() {
+//        return directionToMove;
+//    }
 
 
 
@@ -85,9 +85,9 @@ public class Car {
         this.length = length;
     }
 
-    public void setDirectionToMove(String directionToMove) {
-        this.directionToMove = directionToMove;
-    }
+//    public void setDirectionToMove(String directionToMove) {
+//        this.directionToMove = directionToMove;
+//    }
 
     public List<Position> getOccupyingPositions() {
         List<Position> res = new ArrayList();

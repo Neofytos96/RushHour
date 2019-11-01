@@ -7,6 +7,8 @@ package search;
 
 import rushhour.Car;
 
+import java.util.List;
+
 /**
  *
  * @author steven
@@ -16,4 +18,6 @@ public interface Action {
     public int getCost();
     public String toString();
     public int getCarIndex();
+    public int getSteps();
+    public String getDirection();
 }

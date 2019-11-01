@@ -24,15 +24,13 @@ public class GameState implements search.State {
     boolean[][] nonOccupiedPositions;
     List<Car> cars; // target car is always the first one
 
+    int methodCounter;
+
     int nrRows;
     int nrCols;
 
     GameState updateState;
 
-    private static MoveUp move_up = new MoveUp();
-    private static MoveDown move_down = new MoveDown();
-    private static MoveRight move_right = new MoveRight();
-    private static MoveLeft move_left = new MoveLeft();
 
     public GameState(String fileName) throws Exception {
         BufferedReader in = new BufferedReader(new FileReader(fileName));
@@ -66,7 +64,6 @@ public class GameState implements search.State {
                 occupiedPositions[i][j] = gs.occupiedPositions[i][j];
             }
         }
-        System.out.println(occupiedPositions[0][0]);
         cars = new ArrayList();
         for (Car c : gs.cars) {
             cars.add(new Car(c));
@@ -138,38 +135,14 @@ public class GameState implements search.State {
         }
     }
 
-    public List<Position> getNonOccupiedPositions() {
-        List<Position> nonOccupiedPositions = new ArrayList();
-
-        int[][] state = new int[nrRows][nrCols];
-        for (int i = 0; i < cars.size(); i++) {
-            List<Position> l = cars.get(i).getOccupyingPositions();
-            for (Position pos : l) {
-                state[pos.getRow()][pos.getCol()] = i + 1;
-            }
-        }
-        for (int i = 0; i < state.length; i++) {
-            for (int j = 0; j < state[0].length; j++) {
-                if (state[i][j] == 0) {
-//                    nonOccupiedPositions[i][j] = true;
-//                    find the neighbour points of the non occupied positions
-
-                    nonOccupiedPositions.add(new Position(i, j));
-//                    System.out.print(i + "," + j + "   ");
-                }
-            }
-        }
-//        System.out.println("Non occupied: " + nonOccupiedPositions);
-//        printState();
-        return nonOccupiedPositions;
-    }
-
     //finds the neighbouring points of the empty positions in the grid
-    public List<Car> getMovingCars() {
-        List<Position> nonOccupiedPositions = new ArrayList();
-        List<PositionOccupied> neighbours = new ArrayList();
-        List<Car> movingCars = new ArrayList();
 
+
+    public List<Action> getLegalActions() {
+//        find which cars have blanks and can move to the blank
+//      based on the game state i retrieve the possible car that can move
+        List<PositionOccupied> neighbours = new ArrayList();
+        List<Action> possibleMoves = new ArrayList();
 
         int[][] state = new int[nrRows][nrCols];
         for (int i = 0; i < cars.size(); i++) {
@@ -181,7 +154,6 @@ public class GameState implements search.State {
         for (int i = 0; i < state.length; i++) {
             for (int j = 0; j < state[0].length; j++) {
                 if (state[i][j] == 0) {
-//                    nonOccupiedPositions[i][j] = true;
 //                    find the neighbour points of the non occupied positions
                     if (i > 0) {
                         neighbours.add(new PositionOccupied(i - 1, j, "up"));
@@ -190,26 +162,16 @@ public class GameState implements search.State {
                         neighbours.add(new PositionOccupied(i + 1, j, "down"));
                     }
                     if (j > 0) {
-//                        System.out.println("First: "+j);
                         neighbours.add(new PositionOccupied(i, j - 1, "left"));
                     }
                     if (j < nrCols - 1) {
-//                        System.out.println("Second: "+j);
 
                         neighbours.add(new PositionOccupied(i, j + 1, "right"));
                     }
-//                    if (j > 0 && j < nrCols) {
-//                        neighbours.add(new Position(i, j + 1));
-//                        neighbours.add(new Position(i, j - 1));
-//
-//                    }
-                    nonOccupiedPositions.add(new Position(i, j));
-//                    System.out.print(i + "," + j + "   ");
                 }
             }
         }
-//        System.out.println("Non occupied: " + nonOccupiedPositions);
-//        printState();
+
 
         for (int pos = 0; pos < neighbours.size(); pos++) {
             for (int car = 0; car < cars.size(); car++) {
@@ -222,9 +184,10 @@ public class GameState implements search.State {
                             && neighbours.get(pos).getDirection().equals("down")
                             && cars.get(car).isVertical()) {
 //                        System.out.println("Up: " + cars.indexOf(cars.get(car)));
-                        cars.get(car).setDirectionToMove("up");
-                        movingCars.add(cars.get(car));
-
+//                        cars.get(car).setDirectionToMove("up");
+//                        movingCars.add(cars.get(car));
+                        MoveUp moveUp = new MoveUp(1, cars.indexOf(cars.get(car)));
+                        possibleMoves.add(moveUp);
 
 //                    found cars that are next to non occupied positions
                     } else if (neighbours.get(pos).getCol() ==
@@ -234,9 +197,10 @@ public class GameState implements search.State {
                             && neighbours.get(pos).getDirection().equals("up")
                             && cars.get(car).isVertical()) {
 //                        System.out.println("Down: " + cars.indexOf(cars.get(car)));
-                        cars.get(car).setDirectionToMove("down");
-                        movingCars.add(cars.get(car));
-
+//                        cars.get(car).setDirectionToMove("down");
+//                        movingCars.add(cars.get(car));
+                        MoveDown moveDown = new MoveDown(1, cars.indexOf(cars.get(car)));
+                        possibleMoves.add(moveDown);
 
 //                    found cars that are next to non occupied positions
                     } else if (neighbours.get(pos).getCol()
@@ -247,67 +211,32 @@ public class GameState implements search.State {
                             && !cars.get(car).isVertical()) {
 
 //                        System.out.println("Left: " + cars.indexOf(cars.get(car)));
-                        cars.get(car).setDirectionToMove("left");
-                        movingCars.add(cars.get(car));
+//                        cars.get(car).setDirectionToMove("left");
+//                        movingCars.add(cars.get(car));
+                        MoveLeft moveLeft = new MoveLeft(1, cars.indexOf(cars.get(car)));
+                        possibleMoves.add(moveLeft);
 
                     } else if (neighbours.get(pos).getCol()
                             == occupiedPos.getCol()
                             && neighbours.get(pos).getRow()
-                            ==occupiedPos.getRow()
+                            == occupiedPos.getRow()
                             && neighbours.get(pos).getDirection().equals("left")
                             && !cars.get(car).isVertical()) {
 
 //                        System.out.println("Right: " + cars.indexOf(cars.get(car)));
-                        cars.get(car).setDirectionToMove("right");
-                        movingCars.add(cars.get(car));
-
+//                        cars.get(car).setDirectionToMove("right");
+//                        movingCars.add(cars.get(car));
+                        MoveRight moveRight = new MoveRight(1, cars.indexOf(cars.get(car)));
+                        possibleMoves.add(moveRight);
                     }
                 }
             }
         }
-        return movingCars;
-    }
-
-
-    public List<Action> getLegalActions() {
-//        find which cars have blanks and can move to the blank
-//      based on the game state i retrieve the possible car that can move
-
-        ArrayList<Action> possibleMoves = new ArrayList();
-        List<Car> movingCars = getMovingCars();
-        for (int i = 0; i < movingCars.size(); i++) {
-//            System.out.println(cars.indexOf(movingCars.get(i)) + " can go " + movingCars.get(i).getDirectionToMove());
-            if (movingCars.get(i).getDirectionToMove().equals("right")) {
-                move_right.setCarIndex(cars.indexOf(movingCars.get(i)));
-                possibleMoves.add(move_right);
-            } else if (movingCars.get(i).getDirectionToMove().equals("left")) {
-                move_left.setCarIndex(cars.indexOf(movingCars.get(i)));
-                possibleMoves.add(move_left);
-            } else if (movingCars.get(i).getDirectionToMove().equals("up")) {
-                move_up.setCarIndex(cars.indexOf(movingCars.get(i)));
-                possibleMoves.add(move_up);
-
-            } else if (movingCars.get(i).getDirectionToMove().equals("down")) {
-                move_down.setCarIndex(cars.indexOf(movingCars.get(i)));
-                possibleMoves.add(move_down);
-            }
-        }
-        System.out.println(possibleMoves);
-
-//
-//        if (isLegal(move_up))
-//            res.add(move_up);
-//        if (isLegal(move_down))
-//            res.add(move_down);
-//        if (isLegal(move_right))
-//            res.add(move_right);
-//        if (isLegal(move_left))
-//            res.add(move_left);
-//
-//
+System.out.println("Possible Moves: "+possibleMoves);
+        System.out.println("Initial State: ");
+        printState();
         return possibleMoves;
 
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public boolean isLegal(Action action) {
@@ -317,99 +246,39 @@ public class GameState implements search.State {
 // and not allow moves outside the box
 // check the orientation first of the car and decided if move can be made
 
-
-//        if (action instanceof MoveUp)
-//            check the above row
-//            return true;
-//        else if (action instanceof MoveDown)
-//                check the row below
-//            return true;
-//        else if (action instanceof MoveRight)
-//                check the column + 1
-//            return true;
-//        else if (action instanceof MoveLeft)
-//                check the column - 1
-//            return true;
-//        else
-
         return true;
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public State doAction(Action action) {
-        System.out.println("Action given: "+action+" "+action.getCarIndex());
-        GameState gameState = new GameState(nrRows, nrCols, cars);
-        List<Car> movingCars = getMovingCars();
-//        System.out.println(movingCars);
-        for (int car = 0; car < movingCars.size(); car++) {
-            Car carToMove = movingCars.get(car);
-            String direction = movingCars.get(car).getDirectionToMove();
 
-            if (action instanceof MoveRight && movingCars.get(car).getDirectionToMove().equals("right")) {
-//                System.out.println(cars.indexOf(movingCars.get(car)) + " will move right");
-//                moveCarRight(carToMove, direction);
-                gameState.moveCar(carToMove, direction);
+        System.out.println("Action given: " + action + " the car " + action.getCarIndex());
+        GameState gameState = new  GameState( new GameState (nrRows, nrCols, cars));
 
-            } else if (action instanceof MoveLeft && movingCars.get(car).getDirectionToMove().equals("left")) {
-//                System.out.println(cars.indexOf(movingCars.get(car)) + " will move left");
-                gameState.moveCar(carToMove, direction);
 
-            } else if (action instanceof MoveUp && movingCars.get(car).getDirectionToMove().equals("up")) {
-//                System.out.println(cars.indexOf(movingCars.get(car)) + " will move up");
-                gameState.moveCar(carToMove, direction);
+        if (action.getDirection().equals("right")) {
+            gameState.cars.get(action.getCarIndex()).setCol(cars.get(action.getCarIndex()).getCol()+ action.getSteps());
 
-            } else if (action instanceof MoveDown && movingCars.get(car).getDirectionToMove().equals("down")) {
-//                System.out.println(cars.indexOf(movingCars.get(car)) + " will move down");
-                gameState.moveCar(carToMove, direction);
+        } else if (action.getDirection().equals("left")) {
+            gameState.cars.get(action.getCarIndex()).setCol(cars.get(action.getCarIndex()).getCol()- action.getSteps());
 
-            }else System.out.println(action);
+        } else if (action.getDirection().equals("up")) {
+            gameState.cars.get(action.getCarIndex()).setRow(cars.get(action.getCarIndex()).getRow()- action.getSteps());
 
+
+        } else if (action.getDirection().equals("down") ) {
+            gameState.cars.get(action.getCarIndex()).setRow(cars.get(action.getCarIndex()).getRow()+ action.getSteps());
         }
-//        if(action instanceof MoveRight)
 
-
-//        else if(action instanceof MoveRight)
-//            res.moveBlank(rowBlank,colBlank+1);
-//        else if(action instanceof MoveUp)
-//            res.moveBlank(rowBlank-1,colBlank);
-//        else if(action instanceof MoveDown)
-//            res.moveBlank(rowBlank+1,colBlank);
-//        else
-//            return null;
+        gameState.printState();
         return gameState;
-//        System.exit(1);
-//                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-
-//    return updateState;
-    }
-
-    private void moveCar(Car carToMove, String direction) {
-        System.out.println(direction+" car: "+ cars.indexOf(carToMove) );
-        if (direction.equals("left")) {
-            if (carToMove.getCol() > 0) {
-                carToMove.setCol(carToMove.getCol() - 1);
-            }
-        } else if (direction.equals("right")) {
-            if (carToMove.getCol() < nrCols) {
-                carToMove.setCol(carToMove.getCol() + 1);
-            }
-        } else if (direction.equals("up")) {
-            if (carToMove.getRow() > 0)
-                carToMove.setRow(carToMove.getRow() - 1);
-        } else if (direction.equals("down")) {
-            if (carToMove.getRow() < nrRows) {
-                carToMove.setCol(carToMove.getCol() + 1);
-            }
-        }
-    printState();
     }
 
 
     public int getEstimatedDistanceToGoal() {
 //        get the column of the car and the total columns
         int distance = 0;
-        int carColumn = cars.get(0).getCol();
-        distance = nrCols - carColumn;
+        int carColumn = cars.get(0).getCol() ;
+        distance = nrCols - carColumn + cars.get(0).getLength();
 
         return distance;
 
