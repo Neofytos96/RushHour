@@ -189,8 +189,7 @@ public class GameState implements search.State {
                                 MoveUp moveUp = new MoveUp(steps, cars.indexOf(cars.get(car)));
                                 possibleMoves.add(moveUp);
 //                                System.out.println("In loop: " + possibleMoves);
-                            }
-                            else break;
+                            } else break;
                         }
 
 
@@ -207,8 +206,7 @@ public class GameState implements search.State {
                                 MoveDown moveDown = new MoveDown(steps, cars.indexOf(cars.get(car)));
                                 possibleMoves.add(moveDown);
 //                                System.out.println("In loop: " + possibleMoves);
-                            }
-                            else break;
+                            } else break;
                         }
 
 //                    found cars that are next to non occupied positions
@@ -220,13 +218,12 @@ public class GameState implements search.State {
                             && !cars.get(car).isVertical()) {
 
                         for (int steps = 1; steps <= nrCols - (nrCols - neighbours.get(pos).getCol()); steps++) {
-                            if (state[neighbours.get(pos).getRow()][occupiedPos.getCol()- steps] == 0) {
+                            if (state[neighbours.get(pos).getRow()][occupiedPos.getCol() - steps] == 0) {
 //                                System.out.println("Car to move more than one : " + cars.indexOf(cars.get(car)));
                                 MoveLeft moveLeft = new MoveLeft(steps, cars.indexOf(cars.get(car)));
                                 possibleMoves.add(moveLeft);
 //                                System.out.println("In loop: " + possibleMoves);
-                            }
-                            else break;
+                            } else break;
                         }
 
                     } else if (neighbours.get(pos).getCol()
@@ -237,13 +234,12 @@ public class GameState implements search.State {
                             && !cars.get(car).isVertical()) {
 
                         for (int steps = 1; steps < nrCols - neighbours.get(pos).getCol(); steps++) {
-                            if (state[neighbours.get(pos).getRow()][occupiedPos.getCol()+ steps] == 0) {
+                            if (state[neighbours.get(pos).getRow()][occupiedPos.getCol() + steps] == 0) {
 //                                System.out.println("Car to move more than one : " + cars.indexOf(cars.get(car)));
                                 MoveRight moveRight = new MoveRight(steps, cars.indexOf(cars.get(car)));
                                 possibleMoves.add(moveRight);
 //                                System.out.println("In loop: " + possibleMoves);
-                            }
-                            else break;
+                            } else break;
                         }
                     }
                 }
@@ -297,7 +293,41 @@ public class GameState implements search.State {
         int carColumn = cars.get(0).getCol();
         distance = nrCols - carColumn + cars.get(0).getLength();
 
-        return distance;
+        int[][] state = new int[nrRows][nrCols];
+
+        for (int i = 0; i < cars.size(); i++) {
+            List<Position> l = cars.get(i).getOccupyingPositions();
+            for (Position pos : l) {
+                state[pos.getRow()][pos.getCol()] = i;
+            }
+
+        }
+        List<Integer> blockingCars = new ArrayList();
+        List<String> blockingSquared = new ArrayList();
+
+        for (int nextCol = 1; nextCol <= nrCols - cars.get(0).getCol() - cars.get(0).getLength(); nextCol++) {
+            int nextCar = state[cars.get(0).getRow()][cars.get(0).getCol() + cars.get(0).getLength() - 1 + nextCol];
+            if (nextCar != 0) {
+                blockingCars.add(nextCar);
+            }
+        }
+
+        for (int carIndex = 0; carIndex < blockingCars.size(); carIndex++) {
+            if (cars.get(carIndex).getRow() > 0) {
+                if (state[cars.get(carIndex).getRow() - 1][cars.get(carIndex).getCol()] != 0) {
+                    blockingSquared.add("blocked");
+                }
+
+            }
+            if (cars.get(carIndex).getRow() < nrRows - 1) {
+                if (state[cars.get(carIndex).getRow() + 1][cars.get(carIndex).getCol()] != 0) {
+                    blockingSquared.add("blocked");
+                }
+            }
+
+        }
+
+        return distance + blockingCars.size() + blockingSquared.size();
 
 
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
