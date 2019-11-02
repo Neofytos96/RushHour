@@ -23,7 +23,7 @@ public class RushHour {
     public static void main(String[] args) throws Exception {
         GameState gs = new GameState(args[0]);
         Astar as = new Astar(gs);
-        System.out.println("Nodes Expanded: "+as.getNodesExpanded());
+//        System.out.println("Nodes Expanded: "+as.getNodesExpanded());
         long startTime = System.currentTimeMillis();
         Node goal = as.findPathToGoal();
         long endTime = System.currentTimeMillis();

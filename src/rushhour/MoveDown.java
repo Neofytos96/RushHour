@@ -42,7 +42,8 @@ public class MoveDown implements Action {
     }
 
     public String toString() {
-        return "move down";
+        return "(" + carIndex + "," + "down" + ","+ steps+ ")";
+
     }
 
 }

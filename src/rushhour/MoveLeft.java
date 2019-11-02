@@ -40,7 +40,9 @@ public class MoveLeft implements Action {
     }
 
     public String toString(){
-        return "move left";
+
+        return "(" + carIndex + "," + "left" + ","+ steps+ ")";
+
     }
 
 

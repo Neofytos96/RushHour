@@ -23,7 +23,7 @@ public class MoveUp implements Action {
     }
 
     public String toString(){
-        return "move up";
+        return "(" + carIndex + "," + "up" + ","+ steps+ ")";
     }
 
 

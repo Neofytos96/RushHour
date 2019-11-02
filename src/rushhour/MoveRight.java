@@ -39,7 +39,8 @@ public class MoveRight implements Action {
     }
 
     public String toString(){
-        return "move right";
+
+        return "(" + carIndex + "," + "right" + ","+ steps+ ")";
     }
 
 
