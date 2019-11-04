@@ -129,11 +129,8 @@ public class GameState implements search.State {
     }
 
     //finds the neighbouring points of the empty positions in the grid
-    public List<Action> getLegalActions() {
-//      find which cars have blanks and can move to the blank
-//      based on the game state retrieve the possible car that can move
+    public List<Action> getLegalActions() {//      based on the game state retrieve the possible car that can move
         List<Action> possibleMoves = new ArrayList();
-
         List<PositionOccupied> neighbours = new ArrayList();
         int[][] state = getStateMap();
 
@@ -150,6 +147,9 @@ public class GameState implements search.State {
                 }
             }
         }
+//        System.out.println(possibleMoves);
+//        System.out.println("Initial State");
+//        printState();
         return possibleMoves;
 
     }
@@ -166,77 +166,61 @@ public class GameState implements search.State {
     }
 
     private void getPossibleMoves(List<Action> possibleMoves, List<PositionOccupied> neighbours, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
-        getMoveUps(possibleMoves, state, pos, car, occupiedPos, neighbourPos);
-        getMoveDowns(possibleMoves, state, pos, car, occupiedPos, neighbourPos);
-        getMoveLefts(possibleMoves, state, pos, car, occupiedPos, neighbourPos);
-        getMoveRights(possibleMoves, state, pos, car, occupiedPos, neighbourPos);
+        getMoveUps(possibleMoves, state, car, occupiedPos, neighbourPos);
+        getMoveDowns(possibleMoves, state, car, occupiedPos, neighbourPos);
+        getMoveLefts(possibleMoves, state, car, occupiedPos, neighbourPos);
+        getMoveRights(possibleMoves, state, car, occupiedPos, neighbourPos);
     }
 
-    private void getMoveRights(List<Action> possibleMoves, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
-        if (neighbourPos.getCol()
-                == occupiedPos.getCol()
-                && neighbourPos.getRow()
-                == occupiedPos.getRow()
+    private void getMoveRights(List<Action> possibleMoves, int[][] state, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+        if (neighbourPos.getCol() == occupiedPos.getCol()
+                && neighbourPos.getRow() == occupiedPos.getRow()
                 && neighbourPos.getDirection().equals("left")
                 && !cars.get(car).isVertical()) {
 //            check if there are more than one steps to be made in the particular direction
             for (int steps = 1; steps < nrCols - neighbourPos.getCol(); steps++) {
                 if (state[neighbourPos.getRow()][occupiedPos.getCol() + steps] == 0) {
-//                                System.out.println("Car to move more than one : " + cars.indexOf(cars.get(car)));
                     MoveRight moveRight = new MoveRight(steps, cars.indexOf(cars.get(car)));
                     possibleMoves.add(moveRight);
-//                                System.out.println("In loop: " + possibleMoves);
                 } else break;
             }
         }
     }
 
-    private void getMoveLefts(List<Action> possibleMoves, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
-        if (neighbourPos.getCol()
-                == occupiedPos.getCol()
-                && neighbourPos.getRow()
-                == occupiedPos.getRow()
+    private void getMoveLefts(List<Action> possibleMoves, int[][] state, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+        if (neighbourPos.getCol() == occupiedPos.getCol()
+                && neighbourPos.getRow() == occupiedPos.getRow()
                 && neighbourPos.getDirection().equals("right")
                 && !cars.get(car).isVertical()) {
 //            check if there are more than one steps to be made in the particular direction
             for (int steps = 1; steps <= nrCols - (nrCols - neighbourPos.getCol()); steps++) {
                 if (state[neighbourPos.getRow()][occupiedPos.getCol() - steps] == 0) {
-//                                System.out.println("Car to move more than one : " + cars.indexOf(cars.get(car)));
                     MoveLeft moveLeft = new MoveLeft(steps, cars.indexOf(cars.get(car)));
                     possibleMoves.add(moveLeft);
-//                                System.out.println("In loop: " + possibleMoves);
                 } else break;
             }
 
         }
     }
 
-    private void getMoveDowns(List<Action> possibleMoves, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
-        if (neighbourPos.getCol() ==
-                occupiedPos.getCol()
-                && neighbourPos.getRow() ==
-                occupiedPos.getRow()
+    private void getMoveDowns(List<Action> possibleMoves, int[][] state, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+        if (neighbourPos.getCol() == occupiedPos.getCol()
+                && neighbourPos.getRow() == occupiedPos.getRow()
                 && neighbourPos.getDirection().equals("up")
                 && cars.get(car).isVertical()) {
 //            check if there are more than one steps to be made in the particular direction
             for (int steps = 1; steps < nrRows - (neighbourPos.getRow()); steps++) {
                 if (state[neighbourPos.getRow() + steps][occupiedPos.getCol()] == 0) {
-//                                System.out.println("Car to move more than one : " + cars.indexOf(cars.get(car)));
                     MoveDown moveDown = new MoveDown(steps, cars.indexOf(cars.get(car)));
                     possibleMoves.add(moveDown);
-//                                System.out.println("In loop: " + possibleMoves);
                 } else break;
             }
-
-//                    found cars that are next to non occupied positions
         }
     }
 
-    private void getMoveUps(List<Action> possibleMoves, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
-        if (neighbourPos.getCol() ==
-                occupiedPos.getCol()
-                && neighbourPos.getRow() ==
-                occupiedPos.getRow()
+    private void getMoveUps(List<Action> possibleMoves, int[][] state, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+        if (neighbourPos.getCol() == occupiedPos.getCol()
+                && neighbourPos.getRow() == occupiedPos.getRow()
                 && neighbourPos.getDirection().equals("down")
                 && cars.get(car).isVertical()) {
             //            check if there are more than one steps to be made in the particular direction
@@ -252,6 +236,8 @@ public class GameState implements search.State {
     }
 
     private void getNeighbours(List<PositionOccupied> neighbours, int[][] state) {
+//using a similar method to the getState method in order to find the
+//points that are next to each empty point in the map
         for (int i = 0; i < state.length; i++) {
             for (int j = 0; j < state[0].length; j++) {
                 if (state[i][j] == 0) {
@@ -286,9 +272,8 @@ public class GameState implements search.State {
 
     public State doAction(Action action) {
 
-//        System.out.println("Action given: " + action + " the car " + action.getCarIndex());
         GameState gameState = new GameState(new GameState(nrRows, nrCols, cars));
-
+//        System.out.println(action);
 
         if (action.getDirection().equals("right")) {
             moveRight(action, gameState);
@@ -303,7 +288,7 @@ public class GameState implements search.State {
         } else if (action.getDirection().equals("down")) {
             moveDown(action, gameState);
         }
-
+//        System.out.println("After Move");
 //        gameState.printState();
         return gameState;
     }
