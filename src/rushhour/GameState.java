@@ -145,7 +145,8 @@ public class GameState implements search.State {
             for (int car = 0; car < cars.size(); car++) {
                 for (int occPos = 0; occPos < cars.get(car).getOccupyingPositions().size(); occPos++) {
                     Position occupiedPos = cars.get(car).getOccupyingPositions().get(occPos);
-                    getPossibleMoves(possibleMoves, neighbours, state, pos, car, occupiedPos);
+                    PositionOccupied neighbourPos = neighbours.get(pos);
+                    getPossibleMoves(possibleMoves, neighbours, state, pos, car, occupiedPos, neighbourPos);
                 }
             }
         }
@@ -164,23 +165,23 @@ public class GameState implements search.State {
         return state;
     }
 
-    private void getPossibleMoves(List<Action> possibleMoves, List<PositionOccupied> neighbours, int[][] state, int pos, int car, Position occupiedPos) {
-        getMoveUps(possibleMoves, neighbours, state, pos, car, occupiedPos);
-        getMoveDowns(possibleMoves, neighbours, state, pos, car, occupiedPos);
-        getMoveLefts(possibleMoves, neighbours, state, pos, car, occupiedPos);
-        getMoveRights(possibleMoves, neighbours, state, pos, car, occupiedPos);
+    private void getPossibleMoves(List<Action> possibleMoves, List<PositionOccupied> neighbours, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+        getMoveUps(possibleMoves, state, pos, car, occupiedPos, neighbourPos);
+        getMoveDowns(possibleMoves, state, pos, car, occupiedPos, neighbourPos);
+        getMoveLefts(possibleMoves, state, pos, car, occupiedPos, neighbourPos);
+        getMoveRights(possibleMoves, state, pos, car, occupiedPos, neighbourPos);
     }
 
-    private void getMoveRights(List<Action> possibleMoves, List<PositionOccupied> neighbours, int[][] state, int pos, int car, Position occupiedPos) {
-        if (neighbours.get(pos).getCol()
+    private void getMoveRights(List<Action> possibleMoves, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+        if (neighbourPos.getCol()
                 == occupiedPos.getCol()
-                && neighbours.get(pos).getRow()
+                && neighbourPos.getRow()
                 == occupiedPos.getRow()
-                && neighbours.get(pos).getDirection().equals("left")
+                && neighbourPos.getDirection().equals("left")
                 && !cars.get(car).isVertical()) {
 //            check if there are more than one steps to be made in the particular direction
-            for (int steps = 1; steps < nrCols - neighbours.get(pos).getCol(); steps++) {
-                if (state[neighbours.get(pos).getRow()][occupiedPos.getCol() + steps] == 0) {
+            for (int steps = 1; steps < nrCols - neighbourPos.getCol(); steps++) {
+                if (state[neighbourPos.getRow()][occupiedPos.getCol() + steps] == 0) {
 //                                System.out.println("Car to move more than one : " + cars.indexOf(cars.get(car)));
                     MoveRight moveRight = new MoveRight(steps, cars.indexOf(cars.get(car)));
                     possibleMoves.add(moveRight);
@@ -190,16 +191,16 @@ public class GameState implements search.State {
         }
     }
 
-    private void getMoveLefts(List<Action> possibleMoves, List<PositionOccupied> neighbours, int[][] state, int pos, int car, Position occupiedPos) {
-        if (neighbours.get(pos).getCol()
+    private void getMoveLefts(List<Action> possibleMoves, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+        if (neighbourPos.getCol()
                 == occupiedPos.getCol()
-                && neighbours.get(pos).getRow()
+                && neighbourPos.getRow()
                 == occupiedPos.getRow()
-                && neighbours.get(pos).getDirection().equals("right")
+                && neighbourPos.getDirection().equals("right")
                 && !cars.get(car).isVertical()) {
 //            check if there are more than one steps to be made in the particular direction
-            for (int steps = 1; steps <= nrCols - (nrCols - neighbours.get(pos).getCol()); steps++) {
-                if (state[neighbours.get(pos).getRow()][occupiedPos.getCol() - steps] == 0) {
+            for (int steps = 1; steps <= nrCols - (nrCols - neighbourPos.getCol()); steps++) {
+                if (state[neighbourPos.getRow()][occupiedPos.getCol() - steps] == 0) {
 //                                System.out.println("Car to move more than one : " + cars.indexOf(cars.get(car)));
                     MoveLeft moveLeft = new MoveLeft(steps, cars.indexOf(cars.get(car)));
                     possibleMoves.add(moveLeft);
@@ -210,16 +211,16 @@ public class GameState implements search.State {
         }
     }
 
-    private void getMoveDowns(List<Action> possibleMoves, List<PositionOccupied> neighbours, int[][] state, int pos, int car, Position occupiedPos) {
-        if (neighbours.get(pos).getCol() ==
+    private void getMoveDowns(List<Action> possibleMoves, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+        if (neighbourPos.getCol() ==
                 occupiedPos.getCol()
-                && neighbours.get(pos).getRow() ==
+                && neighbourPos.getRow() ==
                 occupiedPos.getRow()
-                && neighbours.get(pos).getDirection().equals("up")
+                && neighbourPos.getDirection().equals("up")
                 && cars.get(car).isVertical()) {
 //            check if there are more than one steps to be made in the particular direction
-            for (int steps = 1; steps < nrRows - (neighbours.get(pos).getRow()); steps++) {
-                if (state[neighbours.get(pos).getRow() + steps][occupiedPos.getCol()] == 0) {
+            for (int steps = 1; steps < nrRows - (neighbourPos.getRow()); steps++) {
+                if (state[neighbourPos.getRow() + steps][occupiedPos.getCol()] == 0) {
 //                                System.out.println("Car to move more than one : " + cars.indexOf(cars.get(car)));
                     MoveDown moveDown = new MoveDown(steps, cars.indexOf(cars.get(car)));
                     possibleMoves.add(moveDown);
@@ -231,16 +232,16 @@ public class GameState implements search.State {
         }
     }
 
-    private void getMoveUps(List<Action> possibleMoves, List<PositionOccupied> neighbours, int[][] state, int pos, int car, Position occupiedPos) {
-        if (neighbours.get(pos).getCol() ==
+    private void getMoveUps(List<Action> possibleMoves, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+        if (neighbourPos.getCol() ==
                 occupiedPos.getCol()
-                && neighbours.get(pos).getRow() ==
+                && neighbourPos.getRow() ==
                 occupiedPos.getRow()
-                && neighbours.get(pos).getDirection().equals("down")
+                && neighbourPos.getDirection().equals("down")
                 && cars.get(car).isVertical()) {
             //            check if there are more than one steps to be made in the particular direction
-            for (int steps = 1; steps <= nrRows - (nrRows - neighbours.get(pos).getRow()); steps++) {
-                if (state[neighbours.get(pos).getRow() - steps][occupiedPos.getCol()] == 0) {
+            for (int steps = 1; steps <= nrRows - (nrRows - neighbourPos.getRow()); steps++) {
+                if (state[neighbourPos.getRow() - steps][occupiedPos.getCol()] == 0) {
                     MoveUp moveUp = new MoveUp(steps, cars.indexOf(cars.get(car)));
                     possibleMoves.add(moveUp);
                 } else break;
@@ -296,7 +297,7 @@ public class GameState implements search.State {
             moveLeft(action, gameState);
 
         } else if (action.getDirection().equals("up")) {
-            gameState.cars.get(action.getCarIndex()).setRow(cars.get(action.getCarIndex()).getRow() - action.getSteps());
+            moveUp(action, gameState);
 
 
         } else if (action.getDirection().equals("down")) {
@@ -305,6 +306,10 @@ public class GameState implements search.State {
 
 //        gameState.printState();
         return gameState;
+    }
+
+    private void moveUp(Action action, GameState gameState) {
+        gameState.cars.get(action.getCarIndex()).setRow(cars.get(action.getCarIndex()).getRow() - action.getSteps());
     }
 
     private void moveDown(Action action, GameState gameState) {
@@ -327,10 +332,18 @@ public class GameState implements search.State {
         List<Integer> blockingCars = getBlockingCars(state[cars.get(0).getRow()]);
 
         List<String> blockingSquared = getBlockersOfBlockingCars(state, blockingCars);
-
-        int hybrid_heuristic = distance + blockingCars.size() + blockingSquared.size();
-
-        return hybrid_heuristic;
+//*5 *2 /2
+//        System.out.println("Distance: "+ distance/(nrCols-cars.get(0).getLength()));
+//        System.out.println("Blocking Cars: "+ blockingCars.size() );
+//        System.out.println("Blocking of blocking: "+ blockingSquared.size());
+//        System.out.println(blockingCars.size()+blockingSquared.size());
+//        Add one to the cost if there are 1 or more cars blocking the way
+        int blockingCarsSize = 0;
+        if (blockingCars.size()>0){
+            blockingCarsSize = blockingCars.size()+1;
+        }
+        return ( blockingCarsSize + blockingSquared.size());
+//        return 0;
 
     }
 
@@ -359,13 +372,14 @@ public class GameState implements search.State {
 
 
         for (int carIndex = 0; carIndex < blockingCars.size(); carIndex++) {
+           boolean found = false;
             if (cars.get(carIndex).getRow() > 0) {
                 if (state[cars.get(carIndex).getRow() - 1][cars.get(carIndex).getCol()] != 0) {
-                    blockingSquared.add("blocked");
+                    found = true;
                 }
 
             }
-            if (cars.get(carIndex).getRow() < nrRows - 1) {
+            if (cars.get(carIndex).getRow() < nrRows - 1 && found) {
                 if (state[cars.get(carIndex).getRow() + 1][cars.get(carIndex).getCol()] != 0) {
                     blockingSquared.add("blocked");
                 }
@@ -384,6 +398,7 @@ public class GameState implements search.State {
                 blockingCars.add(nextCar);
             }
         }
+
         return blockingCars;
     }
 
