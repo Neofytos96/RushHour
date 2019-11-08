@@ -143,13 +143,10 @@ public class GameState implements search.State {
                 for (int occPos = 0; occPos < cars.get(car).getOccupyingPositions().size(); occPos++) {
                     Position occupiedPos = cars.get(car).getOccupyingPositions().get(occPos);
                     PositionOccupied neighbourPos = neighbours.get(pos);
-                    getPossibleMoves(possibleMoves, neighbours, state, pos, car, occupiedPos, neighbourPos);
+                    getPossibleMoves(possibleMoves, state, car, occupiedPos, neighbourPos);
                 }
             }
         }
-//        System.out.println(possibleMoves);
-//        System.out.println("Initial State");
-//        printState();
         return possibleMoves;
 
     }
@@ -165,7 +162,7 @@ public class GameState implements search.State {
         return state;
     }
 
-    private void getPossibleMoves(List<Action> possibleMoves, List<PositionOccupied> neighbours, int[][] state, int pos, int car, Position occupiedPos, PositionOccupied neighbourPos) {
+    private void getPossibleMoves(List<Action> possibleMoves, int[][] state, int car, Position occupiedPos, PositionOccupied neighbourPos) {
         getMoveUps(possibleMoves, state, car, occupiedPos, neighbourPos);
         getMoveDowns(possibleMoves, state, car, occupiedPos, neighbourPos);
         getMoveLefts(possibleMoves, state, car, occupiedPos, neighbourPos);
@@ -261,12 +258,6 @@ public class GameState implements search.State {
     }
 
     public boolean isLegal(Action action) {
-
-// in order to define if a move is legal or not
-// we have to know all the occupied positions by other cars
-// and not allow moves outside the box
-// check the orientation first of the car and decided if move can be made
-
         return true;
     }
 
@@ -288,8 +279,6 @@ public class GameState implements search.State {
         } else if (action.getDirection().equals("down")) {
             moveDown(action, gameState);
         }
-//        System.out.println("After Move");
-//        gameState.printState();
         return gameState;
     }
 
@@ -311,23 +300,20 @@ public class GameState implements search.State {
 
 
     public int getEstimatedDistanceToGoal() {
+//        implemented for the improved heuristic
         int distance = getDistanceToLastColumn();
 
         int[][] state = getState();
         List<Integer> blockingCars = getBlockingCars(state[cars.get(0).getRow()]);
 
         List<String> blockingSquared = getBlockersOfBlockingCars(state, blockingCars);
-//*5 *2 /2
-//        System.out.println("Distance: "+ distance/(nrCols-cars.get(0).getLength()));
-//        System.out.println("Blocking Cars: "+ blockingCars.size() );
-//        System.out.println("Blocking of blocking: "+ blockingSquared.size());
-//        System.out.println(blockingCars.size()+blockingSquared.size());
 //        Add one to the cost if there are 1 or more cars blocking the way
         int blockingCarsSize = 0;
-        if (blockingCars.size()>0){
-            blockingCarsSize = blockingCars.size()+1;
+        if (blockingCars.size() > 0) {
+            blockingCarsSize = blockingCars.size() + 1;
         }
-        return ( blockingCarsSize + blockingSquared.size());
+        return (blockingCarsSize + blockingSquared.size());
+//        used return 0 to check the trivial heuristic
 //        return 0;
 
     }
@@ -357,7 +343,7 @@ public class GameState implements search.State {
 
 
         for (int carIndex = 0; carIndex < blockingCars.size(); carIndex++) {
-           boolean found = false;
+            boolean found = false;
             if (cars.get(carIndex).getRow() > 0) {
                 if (state[cars.get(carIndex).getRow() - 1][cars.get(carIndex).getCol()] != 0) {
                     found = true;
