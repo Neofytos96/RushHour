@@ -360,11 +360,11 @@ public class GameState implements search.State {
         return blockingSquared;
     }
 
-    private List<Integer> getBlockingCars(int[] ints) {
+    private List<Integer> getBlockingCars(int[] carIndex) {
         List<Integer> blockingCars = new ArrayList();
 
         for (int nextCol = 1; nextCol <= nrCols - cars.get(0).getCol() - cars.get(0).getLength(); nextCol++) {
-            int nextCar = ints[cars.get(0).getCol() + cars.get(0).getLength() - 1 + nextCol];
+            int nextCar = carIndex[cars.get(0).getCol() + cars.get(0).getLength() - 1 + nextCol];
             if (nextCar != 0) {
                 blockingCars.add(nextCar);
             }
